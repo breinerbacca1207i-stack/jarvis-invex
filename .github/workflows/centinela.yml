@@ -1,0 +1,36 @@
+name: JARVIS Modo Centinela
+
+on:
+  schedule:
+    # Se ejecuta de Lunes a Viernes a las 21:10 UTC (4:10 PM Colombia)
+    - cron: '10 21 * * 1-5'
+  workflow_dispatch: # Este botón nos permite ejecutarlo manualmente cuando queramos
+
+jobs:
+  ejecutar-jarvis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código del repositorio
+        uses: actions/checkout@v3
+
+      - name: Instalar Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar librerías (Pandas, Yahoo Finance, etc.)
+        run: |
+          pip install -r requirements.txt
+
+      - name: Reconstruir archivo de Google Sheets
+        run: |
+          echo '${{ secrets.GCP_CREDENCIALES }}' > credenciales.json
+
+      - name: Ejecutar Análisis de Mercado
+        env:
+          API_KEY_GEMINI: ${{ secrets.API_KEY_GEMINI }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python trading_ai.py --alerta
