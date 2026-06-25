@@ -20,7 +20,7 @@ st.title("Invex: Centro de Operaciones JARVIS")
 st.markdown("---")
 
 # Intenta leer la llave local, si no, usa la de la nube
-API_KEY_GEMINI = os.getenv("API_KEY_GEMINI", st.secrets.get("API_KEY_GEMINI", "AQ.Ab8RN6KufJ3T5Xad69IYSMtBKJ-AoWwejg_z3Iu1ikd46Pv_pw"))
+API_KEY_GEMINI = os.getenv("API_KEY_GEMINI", st.secrets.get("API_KEY_GEMINI", "AQ.Ab8RN6J4U1UNseNhlgbysNcCTbErJuJHiEd1l_9MlUc2Ti0t0Q"))
 
 
 # --- 2. CREACIÓN DE PESTAÑAS (TABS) ---
