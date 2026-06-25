@@ -6,13 +6,22 @@ from google import genai
 import os
 from trading_ai import obtener_portafolio_de_sheets, descargar_precios_y_analisis_tecnico
 
+# Reconstruir credenciales de Google Sheets de forma segura en la nube
+if not os.path.exists("credenciales.json"):
+    try:
+        with open("credenciales.json", "w") as f:
+            f.write(st.secrets["GCP_CREDENCIALES"])
+    except:
+        pass
+
 # --- 1. CONFIGURACIÓN INICIAL ---
 st.set_page_config(page_title="Invex - Terminal", page_icon="📈", layout="wide")
 st.title("Invex: Centro de Operaciones JARVIS")
 st.markdown("---")
 
-# ¡ATENCIÓN! Reemplaza el texto de la derecha por tu llave real.
-API_KEY_GEMINI = os.getenv("API_KEY_GEMINI", "AQ.Ab8RN6KufJ3T5Xad69IYSMtBKJ-AoWwejg_z3Iu1ikd46Pv_pw")
+# Intenta leer la llave local, si no, usa la de la nube
+API_KEY_GEMINI = os.getenv("API_KEY_GEMINI", st.secrets.get("API_KEY_GEMINI", "AQ.Ab8RN6KufJ3T5Xad69IYSMtBKJ-AoWwejg_z3Iu1ikd46Pv_pw"))
+
 
 # --- 2. CREACIÓN DE PESTAÑAS (TABS) ---
 tab_resumen, tab_graficos, tab_chat = st.tabs(["📊 Resumen de Portafolio", "📈 Gráficos Visuales", "💬 Chat con JARVIS"])
