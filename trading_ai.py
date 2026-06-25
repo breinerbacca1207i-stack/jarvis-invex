@@ -10,7 +10,7 @@ import sys
 
 # --- 1. CONFIGURACIÓN DEL SISTEMA ---
 # Usamos os.getenv para leer llaves ocultas (o valores por defecto para pruebas locales)
-API_KEY_GEMINI = os.getenv("API_KEY_GEMINI", "AQ.Ab8RN6KufJ3T5Xad69IYSMtBKJ-AoWwejg_z3Iu1ikd46Pv_pw")
+API_KEY_GEMINI = os.getenv("API_KEY_GEMINI", "AQ.Ab8RN6J4U1UNseNhlgbysNcCTbErJuJHiEd1l_9MlUc2Ti0t0Q")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "8877606673:AAHsLzX2RPYNMdPZ20W0UHSqDD74DmvW2qI")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "6585335847")
 
