@@ -5,6 +5,44 @@ import yfinance as yf
 from google import genai
 import os
 from trading_ai import obtener_portafolio_de_sheets, descargar_precios_y_analisis_tecnico
+import streamlit as st
+import pandas as pd
+import yfinance as yf
+import pandas_ta as ta
+from google import genai
+import os
+
+# --- MOTOR DE ANÁLISIS TÉCNICO ---
+def obtener_radiografia_tecnica(ticker):
+    """
+    Descarga el historial del activo y calcula indicadores matemáticos clave.
+    Diseñado para resistir entradas erróneas del usuario público.
+    """
+    try:
+        # 1. Descargar historial de 6 meses
+        df = yf.Ticker(ticker).history(period="6mo")
+        
+        if df.empty:
+            return None, "No se encontraron datos para este símbolo."
+            
+        # 2. Inyectar indicadores usando pandas_ta
+        # RSI (Fuerza de la tendencia)
+        df.ta.rsi(length=14, append=True)
+        # MACD (Cruces de tendencia)
+        df.ta.macd(append=True)
+        # Medias Móviles (Soportes/Resistencias)
+        df.ta.sma(length=20, append=True)
+        df.ta.sma(length=50, append=True)
+        
+        # 3. Limpiar datos vacíos generados por los cálculos
+        df.dropna(inplace=True)
+        
+        # 4. Retornar solo los últimos 3 días para el análisis de la IA
+        ultimos_dias = df.tail(3)
+        return ultimos_dias, "Éxito"
+        
+    except Exception as e:
+        return None, f"Error al procesar el activo: {e}"
 
 # Reconstruir credenciales de Google Sheets de forma segura en la nube
 if not os.path.exists("credenciales.json"):
