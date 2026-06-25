@@ -46,3 +46,6 @@ websockets==16.0
 yfinance==1.4.1
 streamlit
 google-genai
+yfinance
+pandas
+pandas_ta
