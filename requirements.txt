@@ -49,3 +49,4 @@ google-genai
 yfinance
 pandas
 pandas_ta
+numpy<2.3.0
