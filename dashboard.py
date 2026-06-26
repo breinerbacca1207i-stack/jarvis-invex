@@ -4,6 +4,13 @@ import yfinance as yf
 import pandas_ta as ta
 from google import genai
 import os
+from supabase import create_client, Client
+# ... tus otros imports (pandas, yfinance, etc.) ...
+
+# Conexión a Supabase usando los Secrets que configuraste
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- 1. CONFIGURACIÓN INICIAL ---
 st.set_page_config(page_title="Invex - Trading", page_icon="📈", layout="wide")
@@ -84,6 +91,26 @@ with tab_radar:
                         )
                         
                         st.markdown(respuesta.text)
+                        
+                        # --- INICIO DEL CÓDIGO PARA GUARDAR EN SUPABASE ---
+                        try:
+                            # 1. Extraemos el precio y el RSI del último día de la tabla
+                            ultimo_precio = float(datos['Close'].iloc[-1])
+                            ultimo_rsi = float(datos['RSI_14'].iloc[-1])
+                            
+                            # 2. Insertamos la fila en tu tabla de la nube
+                            supabase.table('historial_trading').insert({
+                                "ticker": ticker_usuario,
+                                "precio": ultimo_precio,
+                                "rsi": ultimo_rsi,
+                                "veredicto": respuesta.text
+                            }).execute()
+                            
+                            st.toast("✅ Operación registrada en Invex DB exitosamente.")
+                        except Exception as e_bd:
+                            st.error(f"Error al guardar en la Base de Datos: {e_bd}")
+                        # --- FIN DEL CÓDIGO PARA GUARDAR ---
+                        
                         
                     except Exception as e:
                         st.error(f"Error de conexión con el cerebro de JARVIS: {e}")
