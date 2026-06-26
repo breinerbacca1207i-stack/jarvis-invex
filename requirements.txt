@@ -46,7 +46,7 @@ yfinance==1.4.1
 streamlit>=1.35.0
 google-genai
 yfinance
-pandas
+pandas<3.0.0
 pandas_ta
 numpy<2.3.0
 supabase
