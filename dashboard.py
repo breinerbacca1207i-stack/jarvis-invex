@@ -16,7 +16,7 @@ st.title("Invex: Asistente Cuantitativo JARVIS")
 st.markdown("---")
 
 # Conexión segura a Gemini
-API_KEY_GEMINI = os.getenv("API_KEY_GEMINI", st.secrets.get("API_KEY_GEMINI", "AQ.Ab8RN6J4U1UNseNhlgbysNcCTbErJuJHiEd1l_9MlUc2Ti0t0Q"))
+API_KEY_GEMINI = os.getenv("API_KEY_GEMINI", st.secrets.get("API_KEY_GEMINI", "AQ.Ab8RN6KOir4bSzsF42EPYHv8fsv4Yi1uwX4T25TX-awSFXiwu"))
 
 # --- 2. MOTOR DE ANÁLISIS TÉCNICO (Oculto al usuario) ---
 def obtener_radiografia_tecnica(ticker):
