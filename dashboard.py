@@ -92,11 +92,9 @@ with tab_radar:
                         
                         # --- INICIO DEL CÓDIGO PARA GUARDAR EN SUPABASE ---
                         try:
-                            # 1. Extraemos el precio y el RSI del último día de la tabla
                             ultimo_precio = float(datos['Close'].iloc[-1])
                             ultimo_rsi = float(datos['RSI_14'].iloc[-1])
                             
-                            # 2. Insertamos la fila en tu tabla de la nube
                             supabase.table('historial_trading').insert({
                                 "ticker": ticker_usuario,
                                 "precio": ultimo_precio,
@@ -108,7 +106,6 @@ with tab_radar:
                         except Exception as e_bd:
                             st.error(f"Error al guardar en la Base de Datos: {e_bd}")
                         # --- FIN DEL CÓDIGO PARA GUARDAR ---
-                        
                         
                     except Exception as e:
                         st.error(f"Error de conexión con el cerebro de JARVIS: {e}")
