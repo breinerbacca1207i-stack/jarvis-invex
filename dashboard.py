@@ -41,76 +41,69 @@ tab_radar, tab_graficos, tab_chat = st.tabs(["🎯 Radar de Mercado", "📈 Grá
 
 # --- PESTAÑA 1: RADAR DE MERCADO ---
 with tab_radar:
-    st.subheader("Escáner Cuantitativo Público")
-    st.markdown("Ingresa un activo para que JARVIS evalúe sus indicadores matemáticos y emita un veredicto de operación.")
+    st.subheader("Radar Cuantitativo Maestro")
+    st.markdown("Ejecuta un escaneo simultáneo de todo el portafolio para detectar zonas de oportunidad.")
     
-    col1, col2 = st.columns([1, 2]) # El chat/veredicto será más ancho que la tabla
+    # Tu portafolio predefinido de Invex
+    portafolio_invex = ["VOO", "MELI", "SMH", "BTC-USD", "AAPL"]
+    st.write(f"**Activos en vigilancia:** {', '.join(portafolio_invex)}")
     
-    with col1:
-        ticker_usuario = st.text_input("Símbolo (ej. BTC-USD, VOO, SMH, MELI):", "BTC-USD").upper()
-        btn_analizar = st.button("Escanear Mercado")
-        
-    if btn_analizar:
-        with st.spinner("Procesando matemáticas del mercado..."):
-            datos, mensaje = obtener_radiografia_tecnica(ticker_usuario)
+    btn_maestro = st.button("Ejecutar Escáner de Portafolio", type="primary", use_container_width=True)
+    
+    if btn_maestro:
+        with st.spinner("JARVIS está analizando la estructura matemática del portafolio..."):
+            client = genai.Client(api_key=API_KEY_GEMINI)
             
-            if datos is not None:
-                with col1:
-                    st.success("Datos extraídos.")
-                    # Mostramos la tabla matemática limpia
-                    st.dataframe(datos[['Close', 'RSI_14', 'SMA_20', 'SMA_50']].style.format("{:.2f}"))
+            # Creamos contenedores visuales para el resumen
+            st.markdown("### 📊 Reporte Ejecutivo de JARVIS")
+            
+            for ticker in portafolio_invex:
+                datos, mensaje = obtener_radiografia_tecnica(ticker)
                 
-                with col2:
-                    st.info("Generando veredicto de JARVIS...")
+                if datos is not None:
+                    # Extraer datos rápidos para visualización
+                    ultimo_precio = float(datos['Close'].iloc[-1])
+                    ultimo_rsi = float(datos['RSI_14'].iloc[-1])
+                    datos_str = datos[['Close', 'RSI_14', 'SMA_20', 'SMA_50']].to_string()
+                    
+                    # Prompt ultra rápido para análisis en lote
+                    prompt_lote = f"""
+                    Eres JARVIS. Analiza rápidamente los últimos 3 días de {ticker}:
+                    {datos_str}
+                    Sé muy breve (máximo 2 líneas de justificación) y termina OBLIGATORIAMENTE con una de estas frases en MAYÚSCULAS NEGRITAS:
+                    - **ES BUEN MOMENTO PARA COMPRAR**
+                    - **ES BUEN MOMENTO PARA VENDER**
+                    - **ES MOMENTO DE MANTENER / ESPERAR**
+                    """
+                    
                     try:
-                        client = genai.Client(api_key=API_KEY_GEMINI)
-                        
-                        # Convertimos la tabla a texto para que la IA la entienda
-                        datos_str = datos[['Close', 'RSI_14', 'SMA_20', 'SMA_50']].to_string()
-                        
-                        # EL CEREBRO DEL TRADER: Las instrucciones estrictas para la IA
-                        prompt_trading = f"""
-                        Eres JARVIS, un analista cuantitativo experto de la plataforma Invex. Analiza los siguientes datos técnicos de los últimos 3 días para el activo {ticker_usuario}:
-                        
-                        {datos_str}
-                        
-                        Reglas de tu respuesta:
-                        1. Haz un análisis directo, evaluando la tendencia del precio, el RSI (recuerda: > 70 es sobrecompra/peligro de caída, < 30 es sobreventa/oportunidad), y la relación entre la SMA_20 y SMA_50.
-                        2. No seas excesivamente detallado, ve al grano.
-                        3. OBLIGATORIO: Al final de tu respuesta, en un párrafo nuevo y en MAYÚSCULAS NEGRITAS, debes dar un veredicto definitivo usando solo una de estas tres frases:
-                        - **ES BUEN MOMENTO PARA COMPRAR**
-                        - **ES BUEN MOMENTO PARA VENDER**
-                        - **ES MOMENTO DE MANTENER / ESPERAR**
-                        """
-                        
                         respuesta = client.models.generate_content(
                             model='gemini-2.5-flash',
-                            contents=prompt_trading
+                            contents=prompt_lote
                         )
+                        veredicto = respuesta.text
                         
-                        st.markdown(respuesta.text)
+                        # Definir color del semáforo visual según la recomendación
+                        color_icono = "🟢" if "COMPRAR" in veredicto else "🔴" if "VENDER" in veredicto else "🟡"
                         
-                        # --- INICIO DEL CÓDIGO PARA GUARDAR EN SUPABASE ---
-                        try:
-                            ultimo_precio = float(datos['Close'].iloc[-1])
-                            ultimo_rsi = float(datos['RSI_14'].iloc[-1])
-                            
-                            supabase.table('historial_trading').insert({
-                                "ticker": ticker_usuario,
-                                "precio": ultimo_precio,
-                                "rsi": ultimo_rsi,
-                                "veredicto": respuesta.text
-                            }).execute()
-                            
-                            st.toast("✅ Operación registrada en Invex DB exitosamente.")
-                        except Exception as e_bd:
-                            st.error(f"Error al guardar en la Base de Datos: {e_bd}")
-                        # --- FIN DEL CÓDIGO PARA GUARDAR ---
+                        # Mostrar el resultado en un bloque expandible elegante
+                        with st.expander(f"{color_icono} {ticker} | Precio: ${ultimo_precio:.2f} | RSI: {ultimo_rsi:.2f}"):
+                            st.markdown(veredicto)
+                        
+                        # --- GUARDAR EN SUPABASE ---
+                        supabase.table('historial_trading').insert({
+                            "ticker": ticker,
+                            "precio": ultimo_precio,
+                            "rsi": ultimo_rsi,
+                            "veredicto": veredicto
+                        }).execute()
                         
                     except Exception as e:
-                        st.error(f"Error de conexión con el cerebro de JARVIS: {e}")
-            else:
-                st.error(mensaje)
+                        st.error(f"Error en el análisis de {ticker}: {e}")
+                else:
+                    st.warning(f"No se pudieron extraer datos de {ticker}: {mensaje}")
+            
+            st.toast("✅ Escaneo masivo completado y registrado en Invex DB.")
 
 # --- PESTAÑA 2: GRÁFICOS VISUALES ---
 with tab_graficos:
