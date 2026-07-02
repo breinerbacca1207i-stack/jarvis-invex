@@ -126,9 +126,14 @@ with tab_historial:
                 # Convertimos la respuesta en una tabla de Pandas
                 df_historial = pd.DataFrame(respuesta_bd.data)
                 
-                # Ocultamos columnas técnicas y mostramos lo relevante
+                # Definimos las columnas ideales que queremos mostrar
+                columnas_deseadas = ['created_at', 'inserted_at', 'ticker', 'precio', 'rsi', 'veredicto']
+                
+                # Filtramos dinámicamente para usar solo las que SÍ existen en la base de datos
+                columnas_visibles = [col for col in columnas_deseadas if col in df_historial.columns]
+                
                 st.dataframe(
-                    df_historial[['created_at', 'ticker', 'precio', 'rsi', 'veredicto']],
+                    df_historial[columnas_visibles],
                     use_container_width=True,
                     hide_index=True
                 )
