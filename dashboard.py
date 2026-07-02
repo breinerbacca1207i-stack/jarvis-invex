@@ -25,17 +25,21 @@ def obtener_radiografia_tecnica(ticker):
         if df.empty:
             return None, "No se encontraron datos para este símbolo."
         
-        # Inyectar indicadores
+        # Indicadores Base
         df.ta.rsi(length=14, append=True)
-        df.ta.macd(append=True)
         df.ta.sma(length=20, append=True)
         df.ta.sma(length=50, append=True)
         
+        # NUEVOS INDICADORES EXPERTOS: MACD y Bandas de Bollinger
+        df.ta.macd(append=True) # Genera: MACD_12_26_9 y MACDs_12_26_9
+        df.ta.bbands(length=20, std=2, append=True) # Genera: BBL_20_2.0 (Banda Inferior) y BBU_20_2.0 (Banda Superior)
+        
         df.dropna(inplace=True)
-        return df.tail(3), "Éxito"
+        # Extraemos solo el último día para que JARVIS tome la decisión en tiempo real
+        return df.tail(1), "Éxito"
     except Exception as e:
         return None, f"Error al procesar el activo: {e}"
-
+        
 # --- 3. INTERFAZ PÚBLICA (PESTAÑAS) ---
 tab_radar, tab_graficos, tab_chat = st.tabs(["🎯 Radar de Mercado", "📈 Gráficos Visuales", "💬 Chat con JARVIS"])
 
