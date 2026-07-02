@@ -65,8 +65,9 @@ with tab_radar:
                     ultimo_precio = float(datos['Close'].iloc[-1])
                     ultimo_rsi = float(datos['RSI_14'].iloc[-1])
                     
-                    # Filtramos solo las columnas clave para no saturar a la IA
-                    cols_clave = ['Close', 'RSI_14', 'SMA_20', 'SMA_50', 'MACD_12_26_9', 'MACDs_12_26_9', 'BBL_20_2.0', 'BBU_20_2.0']
+                   # Filtramos dinámicamente las columnas clave para evitar errores de versión
+                    palabras_clave = ['Close', 'RSI', 'SMA', 'MACD', 'BBL', 'BBU']
+                    cols_clave = [col for col in datos.columns if any(palabra in col for palabra in palabras_clave)]
                     datos_str = datos[cols_clave].to_string()
                     
                     prompt_experto = f"""
